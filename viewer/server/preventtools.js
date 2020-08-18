@@ -13,7 +13,6 @@ class PreVent {
         return new Observable(sub => {
             var file = new PreVentFile(this, filepath);
             exec(`${this.pvtools} ${filepath} --attrs`, {}, (err, stdout, stderr) => {
-                console.log('indexing ', filepath);
                 var re = /\/(VitalSigns|Waveforms)\/([A-Za-z]*)[|](Sample Period \(ms\)|Readings Per Sample|Unit of Measure|Start Time|End Time)[|](.*)/g
 
                 var matches = stdout.matchAll(re);

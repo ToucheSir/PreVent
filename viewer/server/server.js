@@ -11,13 +11,14 @@ const {PreVentFile, PreVent } = require('./preventtools');
 process.env.PREVENT_HOME = '/home/ryan/devl/uva/';
 process.env.PREVENT_REPO = '/home/ryan/devl/uva/testfiles/other';
 
+var db = [];
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
 })
 
 app.get('/files', (req, res) => { 
-    res.send('list of files');
+    res.send(db);
 });
 
 locatePreVentHome().subscribe(() => indexFiles().subscribe(() => { 
@@ -28,9 +29,8 @@ locatePreVentHome().subscribe(() => indexFiles().subscribe(() => {
 
 function indexFiles() {
     return new Observable(sub => {
-        console.log('index');
+        console.log('indexing...');
         var pvtools = new PreVent(process.env.PREVENT_HOME);
-        var hdf5s = [];
         var obs = [];
 
         var dirs = [process.env.PREVENT_REPO];
@@ -48,8 +48,8 @@ function indexFiles() {
         }
 
         forkJoin(obs).subscribe(data => {
-            hdf5s.push(...data);
-            console.log('hdf5s: ', hdf5s);
+            db.push(...data);
+            console.log(`indexed ${db.length} files`);
 
             sub.next(true);
             sub.complete();
@@ -59,7 +59,7 @@ function indexFiles() {
 
 function locatePreVentHome() {
     return new Observable(sub => {
-        console.log('locate');
+        console.log('locating PreVent tooling home...done');
         sub.next(true);
         sub.complete();
     });
