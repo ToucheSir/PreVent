@@ -21,16 +21,16 @@ app.get('/files', (req, res) => {
     res.send(db);
 });
 
-locatePreVentHome().subscribe(() => indexFiles().subscribe(() => { 
+locatePreVentHome().subscribe(pvhome => indexFiles(pvhome).subscribe(() => { 
     app.listen(port, () => {
         console.log(`Example app listening at http://localhost:${port}`);
     });
 }))
 
-function indexFiles() {
+function indexFiles(pvhome) {
     return new Observable(sub => {
         console.log('indexing...');
-        var pvtools = new PreVent(process.env.PREVENT_HOME);
+        var pvtools = new PreVent(pvhome);
         var obs = [];
 
         var dirs = [process.env.PREVENT_REPO];
@@ -60,7 +60,7 @@ function indexFiles() {
 function locatePreVentHome() {
     return new Observable(sub => {
         console.log('locating PreVent tooling home...done');
-        sub.next(true);
+        sub.next(process.env.PREVENT_HOME);
         sub.complete();
     });
 }

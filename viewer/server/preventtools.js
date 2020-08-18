@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { exec } = require("child_process");
-const { Observable, ObjectUnsubscribedError } = require('rxjs');
+const { Observable } = require('rxjs');
 
 class PreVent {
     
@@ -62,18 +62,6 @@ class PreVent {
                         signal.max = num;
                     }
                 }
-
-                // matches.forEach(match => {
-                //     console.log('match: ', match);
-                //     var hit = `${match[1]}/${match[2]}`;
-                //     if (!signals.includes(hit)) {
-                //         signals.push(hit);
-                //     }
-                // });
-                // console.log(signals);
-
-                
-                //console.log(err, stdout, stderr);
                 sub.next(file);
                 sub.complete();
             });
