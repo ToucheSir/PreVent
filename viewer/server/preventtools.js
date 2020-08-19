@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require("child_process");
 const { Observable } = require('rxjs');
+const { v4: uuidv4 } = require('uuid');
 
 class PreVent {
     
@@ -20,13 +21,13 @@ class PreVent {
                     var signal;
                     if ('VitalSigns' === match[1]) {
                         if (!Object.getOwnPropertyNames(file.vitals).includes(match[2])) {
-                            file.vitals[match[2]] = new Signal(match[2]);
+                            file.vitals[match[2]] = new Signal(match[2], false);
                         }
                         signal = file.vitals[match[2]];
                     }
                     else {
                         if (!Object.getOwnPropertyNames(file.waves).includes(match[2])) {
-                            file.waves[match[2]] = new Signal(match[2]);
+                            file.waves[match[2]] = new Signal(match[2], true);
                         }
                         signal = file.waves[match[2]];
                     }
@@ -67,19 +68,54 @@ class PreVent {
             });
         });
     }
+
+    data(pvfile, signal, from, to) {
+        var path = (signal.wave || false
+            ? `/Waveforms/${signal.name}`
+            : `/VitalSigns/${signal.name}`);
+        return new Observable(sub => {
+            var cmd = `${this.pvtools} ${pvfile} --print --path ${path} --for 2`;
+            console.log(cmd);
+            exec(cmd, {}, (err, stdout, stderr) => {
+                sub.next(stdout.split('\n').map(v => Number.parseFloat(v.split(' ')[1])));
+                //console.log(err, stdout, stderr);
+                // sub.next(stdout.split('\n').map(v => {
+                //     //console.log(v);
+                //     return Number.parseFloat(v.split(' ')[1]);
+                //     //var arr = v.split(' ').map(n => Number.parseFloat(n));
+                //     //return new DataPoint(Number.parseInt(arr[0]), Number.parseFloat(arr[1]));
+                    
+                // }));
+                sub.complete();
+            });
+        });
+    }
 }
 
 class PreVentFile {
     constructor(pvtools, filepath) {
+        this.id = uuidv4();
         this.tooling = pvtools;
         this.file = filepath;
         this.vitals = {};
         this.waves = {};
     }
+
+    wave(wavename) {
+        return this.waves[wavename];
+    }
+
+    vital(vitalname) {
+        return this.vitals[vitalname];
+    }
+
+    data(signal, from = undefined, to = undefined) {
+        return this.tooling.data(this.file, signal, from, to);
+    }
 }
 
 class Signal {
-    constructor(name) {
+    constructor(name, wave) {
         this.name = name;
         this.min = undefined;
         this.max = undefined;
@@ -88,12 +124,20 @@ class Signal {
         this.uom = undefined;
         this.sample_period_ms = 1000;
         this.readings_per_sample = 1;
+        this.wave = wave;
     }
 }
 
+class DataPoint {
+    constructor(utcms, val) {
+        this.utcms = utcms;
+        this.value = val;
+    }
+}
 
 module.exports = {
     PreVent: PreVent,
     PreVentFile: PreVentFile,
-    Signal: Signal
+    Signal: Signal,
+    DataPoint:DataPoint
 };

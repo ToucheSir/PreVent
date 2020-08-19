@@ -21,6 +21,56 @@ app.get('/files', (req, res) => {
     res.send(db);
 });
 
+function getfile(uuid) {
+    return ('x' === uuid
+        ? db[1]
+        : db.filter(f => f.id === uuid)[0]);
+}
+
+app.get('/files/:uuid/waves/:wave/data', (req, res) => {
+    var f = getfile(req.params.uuid);
+
+    var signal = f.wave(req.params.wave);
+    var start = req.query.start || 0;
+    var end = req.query.end || -1;
+
+    f.data(signal, start, end).subscribe(data=>res.send(data));
+});
+
+app.get('/files/:uuid/waves/:wave', (req, res) => {
+    var f = getfile(req.params.uuid);
+    res.send(f.waves[req.params.wave]);
+});
+
+app.get('/files/:uuid/waves', (req, res) => {
+    var f = getfile(req.params.uuid);
+    res.send(f.waves);
+});
+
+app.get('/files/:uuid/vitals/:vital/data', (req, res) => {
+    var f = getfile(req.params.uuid);
+
+    var signal = f.vital(req.params.vital);
+    var start = req.query.start || 0;
+    var end = req.query.end || -1;
+
+    f.data(signal, start, end).subscribe(data => res.send(data));
+});
+
+app.get('/files/:uuid/vitals/:vital', (req, res) => {
+    var f = getfile(req.params.uuid);
+    res.send(f.vitals[req.params.vital]);
+});
+
+app.get('/files/:uuid/vitals', (req, res) => {
+    var f = getfile(req.params.uuid);
+    res.send(f.vitals);
+});
+
+app.get('/files/:uuid', (req, res) => {
+    res.send(db.filter(f => f.id === req.params.uuid));
+});
+
 locatePreVentHome().subscribe(pvhome => indexFiles(pvhome).subscribe(() => { 
     app.listen(port, () => {
         console.log(`Example app listening at http://localhost:${port}`);
