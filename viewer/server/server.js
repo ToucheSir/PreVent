@@ -52,7 +52,7 @@ app.get('/files/:uuid/vitals/:vital/data', (req, res) => {
 
     var signal = f.vital(req.params.vital);
     var start = req.query.start || 0;
-    var end = req.query.end || -1;
+    var end = req.query.end || 1 ;
 
     f.data(signal, start, end).subscribe(data => res.send(data));
 });
@@ -68,7 +68,7 @@ app.get('/files/:uuid/vitals', (req, res) => {
 });
 
 app.get('/files/:uuid', (req, res) => {
-    res.send(db.filter(f => f.id === req.params.uuid));
+    res.send(getfile( req.params.uuid));
 });
 
 locatePreVentHome().subscribe(pvhome => indexFiles(pvhome).subscribe(() => { 

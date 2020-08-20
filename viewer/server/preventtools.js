@@ -14,9 +14,23 @@ class PreVent {
         return new Observable(sub => {
             var file = new PreVentFile(this, filepath);
             exec(`${this.pvtools} ${filepath} --attrs`, {}, (err, stdout, stderr) => {
+                var filere = /\/\|(Start|End) Time\|(.*)/g
+                
+                var matches = stdout.matchAll(filere);
+
+                for (var match of matches) {
+                    var date = new Date(Number.parseInt(match[2]));
+                    if ('Start' === match[1]) {
+                        file.starttime = date;
+                    }
+                    else {
+                        file.endtime = date;
+                    }
+                }
+
                 var re = /\/(VitalSigns|Waveforms)\/([A-Za-z]*)[|](Sample Period \(ms\)|Readings Per Sample|Unit of Measure|Start Time|End Time)[|](.*)/g
 
-                var matches = stdout.matchAll(re);
+                matches = stdout.matchAll(re);
                 for (var match of matches) {
                     var signal;
                     if ('VitalSigns' === match[1]) {
@@ -74,18 +88,17 @@ class PreVent {
             ? `/Waveforms/${signal.name}`
             : `/VitalSigns/${signal.name}`);
         return new Observable(sub => {
-            var cmd = `${this.pvtools} ${pvfile} --print --path ${path} --for 2`;
+            var cmd = `${this.pvtools} ${pvfile} --print --path ${path} --start ${from} --to ${to}`;
             console.log(cmd);
             exec(cmd, {}, (err, stdout, stderr) => {
-                sub.next(stdout.split('\n').map(v => Number.parseFloat(v.split(' ')[1])));
+                //sub.next(stdout.split('\n').filter(v => v.length > 0).map(v => Number.parseFloat(v.split(' ')[1])));
                 //console.log(err, stdout, stderr);
-                // sub.next(stdout.split('\n').map(v => {
-                //     //console.log(v);
-                //     return Number.parseFloat(v.split(' ')[1]);
-                //     //var arr = v.split(' ').map(n => Number.parseFloat(n));
-                //     //return new DataPoint(Number.parseInt(arr[0]), Number.parseFloat(arr[1]));
-                    
-                // }));
+                sub.next(stdout.trim().split('\n').map(v => {
+                    //     //console.log(v);
+                    //     return Number.parseFloat(v.split(' ')[1]);
+                    var arr = v.split(' ').map(n => Number.parseFloat(n));
+                    return new DataPoint(Number.parseInt(arr[0]), Number.parseFloat(arr[1]));
+                }));
                 sub.complete();
             });
         });
@@ -99,6 +112,8 @@ class PreVentFile {
         this.file = filepath;
         this.vitals = {};
         this.waves = {};
+        this.starttime = undefined;
+        this.endtime = undefined;
     }
 
     wave(wavename) {
@@ -130,8 +145,8 @@ class Signal {
 
 class DataPoint {
     constructor(utcms, val) {
-        this.utcms = utcms;
-        this.value = val;
+        this.t = utcms;
+        this.v = val;
     }
 }
 
