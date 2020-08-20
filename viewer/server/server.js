@@ -1,4 +1,5 @@
 
+const compression = require('compression');
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -12,6 +13,8 @@ process.env.PREVENT_HOME = '/home/ryan/devl/uva/';
 process.env.PREVENT_REPO = '/home/ryan/devl/uva/testfiles/other';
 
 var db = [];
+
+app.use(compression());
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -29,12 +32,8 @@ function getfile(uuid) {
 
 app.get('/files/:uuid/waves/:wave/data', (req, res) => {
     var f = getfile(req.params.uuid);
-
     var signal = f.wave(req.params.wave);
-    var start = req.query.start || 0;
-    var end = req.query.end || -1;
-
-    f.data(signal, start, end).subscribe(data=>res.send(data));
+    f.data(signal, req.query.from, req.query.to, req.query.for_s || 2).subscribe(data => res.send(data));
 });
 
 app.get('/files/:uuid/waves/:wave', (req, res) => {
@@ -51,10 +50,7 @@ app.get('/files/:uuid/vitals/:vital/data', (req, res) => {
     var f = getfile(req.params.uuid);
 
     var signal = f.vital(req.params.vital);
-    var start = req.query.start || 0;
-    var end = req.query.end || 1 ;
-
-    f.data(signal, start, end).subscribe(data => res.send(data));
+    f.data(signal, req.query.from, req.query.to, req.query.for_s||60).subscribe(data => res.send(data));
 });
 
 app.get('/files/:uuid/vitals/:vital', (req, res) => {

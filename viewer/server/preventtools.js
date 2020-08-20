@@ -83,12 +83,22 @@ class PreVent {
         });
     }
 
-    data(pvfile, signal, from, to) {
+    data(pvfile, signal, from, to, for_s = 10) {
         var path = (signal.wave || false
             ? `/Waveforms/${signal.name}`
             : `/VitalSigns/${signal.name}`);
         return new Observable(sub => {
-            var cmd = `${this.pvtools} ${pvfile} --print --path ${path} --start ${from} --to ${to}`;
+            var cmd = `${this.pvtools} ${pvfile} --print --path ${path}`;
+            if (from) {
+                cmd += ` --start ${from}`;
+            }
+            if (to) {
+                cmd += ` --end ${to}`;
+            }
+            else {
+                cmd += ` --for ${for_s}`;
+            }
+            
             console.log(cmd);
             exec(cmd, {}, (err, stdout, stderr) => {
                 //sub.next(stdout.split('\n').filter(v => v.length > 0).map(v => Number.parseFloat(v.split(' ')[1])));
@@ -124,8 +134,8 @@ class PreVentFile {
         return this.vitals[vitalname];
     }
 
-    data(signal, from = undefined, to = undefined) {
-        return this.tooling.data(this.file, signal, from, to);
+    data(signal, from = undefined, to = undefined, for_s = undefined) {
+        return this.tooling.data(this.file, signal, from, to, for_s);
     }
 }
 
