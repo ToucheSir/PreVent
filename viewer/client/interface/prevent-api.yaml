@@ -1,0 +1,360 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: PreVent Data Viewer
+basePath: /
+tags:
+- Engine
+paths:
+  /files:
+    get:
+      summary: gets all files
+      operationId: getFiles
+      tags:
+      - Engine
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PreVentFile"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+  /files/{id}:
+    get:
+      summary: Get one file
+      operationId: getFile
+      tags:
+      - Engine
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: The file id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreVentFile"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+  /files/{id}/waves:
+    post:
+      summary: Gets all wave signals for this file
+      operationId: getWaves
+      tags:
+      - Engine
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: the file id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Signal"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+  /files/{id}/waves/{wave}:
+    get:
+      summary: Gets one wave signal from this file
+      operationId: getWave
+      tags:
+      - Engine
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: the file id
+        schema:
+          type: string
+      - name: wave
+        in: path
+        required: true
+        description: the wave name
+        schema:
+          type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Signal"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+  /files/{id}/waves/{wave}/data:
+    get:
+      summary: Gets data for this signal
+      operationId: getWaveData
+      tags:
+      - Engine
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: the file id
+        schema:
+          type: string
+      - name: wave
+        in: path
+        required: true
+        description: the wave name
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        description: when the data should start
+        schema:
+          type: integer
+      - name: to
+        in: query
+        required: false
+        description: when the data should stop
+        schema:
+          type: integer
+      - name: for_s
+        in: query
+        required: false
+        description: how long the data should run for (if end not specified)
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DataPoint"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+
+
+
+
+
+
+
+
+  /files/{id}/vitals:
+    post:
+      summary: Gets all vital signals for this file
+      operationId: getVitals
+      tags:
+      - Engine
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: the file id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Signal"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+  /files/{id}/vitals/{vital}:
+    get:
+      summary: Gets one vitals signal from this file
+      operationId: getVital
+      tags:
+      - Engine
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: the file id
+        schema:
+          type: string
+      - name: vital
+        in: path
+        required: true
+        description: the vital name
+        schema:
+          type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Signal"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+  /files/{id}/vitals/{vital}/data:
+    get:
+      summary: Gets data for this signal
+      operationId: getVitalData
+      tags:
+      - Engine
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: the file id
+        schema:
+          type: string
+      - name: vital
+        in: path
+        required: true
+        description: the vital name
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        description: when the data should start
+        schema:
+          type: integer
+      - name: to
+        in: query
+        required: false
+        description: when the data should stop
+        schema:
+          type: integer
+      - name: for_s
+        in: query
+        required: false
+        description: how long the data should run for (if end not specified)
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DataPoint"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                type: string
+
+
+
+security:
+  - bearerAuth: []
+components:
+  securitySchemas:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+#############################################################
+# SCHEMAS
+#############################################################
+  schemas:
+    Signal:
+      type: object
+      required:
+        - name
+        - wave
+      properties:
+        name:
+          type: string
+        min:
+          type: number
+        max:
+          type: number
+        starttime:
+          type: number
+        endtime:
+          type: number
+        uom:
+          type: string
+        sample_period_ms:
+          type: number
+        readings_per_sample:
+          type: number
+        wave:
+          type: boolean
+    DataPoint:
+      type: object
+      required:
+        - t
+        - v
+      properties:
+        t:
+          type: number
+        v:
+          type: number
+    PreVentFile:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        file:
+          type: string
+        starttime:
+          type: number
+        endtime:
+          type: number
+        vitals:
+          type: array
+          items:
+            $ref: "#/components/schemas/Signal"
+        waves:
+          type: array
+          items:
+            $ref: "#/components/schemas/Signal"
+#    InsightOutputType:
+#      type: string
+#      enum: [STRUCTURE_GRAPH, GRAPH, GRID, DENDROGRAM, PARALLEL_COORDS, COLUMN_CHART, HEATMAP, PIE_CHART]
