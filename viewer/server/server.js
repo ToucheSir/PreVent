@@ -1,6 +1,7 @@
 
 const compression = require('compression');
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 const fs = require('fs');
@@ -15,6 +16,7 @@ process.env.PREVENT_REPO = '/home/ryan/devl/uva/testfiles/other';
 var db = [];
 
 app.use(compression());
+app.use(cors());
 
 app.get('/', (req, res) => {
     res.send('Hello World!');

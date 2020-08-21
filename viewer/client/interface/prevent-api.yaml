@@ -2,7 +2,7 @@ openapi: "3.0.0"
 info:
   version: 1.0.0
   title: PreVent Data Viewer
-basePath: /
+basePath: 
 tags:
 - Engine
 paths:

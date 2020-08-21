@@ -1,13 +1,10 @@
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced. * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * Delete the template below * * * * * * * * * * -->
-<!-- * * * * * * * to get started with your project! * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-
-
 <mat-toolbar>PreVent Data Viewer</mat-toolbar>
-body
-<router-outlet></router-outlet>
+
+<mat-drawer-container autosize>
+    <mat-drawer mode='side' [opened]='true' position='left'>
+        <app-navigation></app-navigation>
+    </mat-drawer>
+    <mat-drawer-content>
+        <app-signal-viewer></app-signal-viewer>
+    </mat-drawer-content>
+</mat-drawer-container>
