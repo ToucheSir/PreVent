@@ -30,5 +30,6 @@ export class NavigationComponent extends OnDestroyMixin implements OnInit {
 
   set file(f: PreVentFile) {
     this.afsvc.setFile(f);
+    this.afsvc.setSignals([f.vitals['HR']]);
   }
 }

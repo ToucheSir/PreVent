@@ -334,6 +334,18 @@ components:
           type: number
         v:
           type: number
+    SignalWindow:
+      type: object
+      required:
+        - start
+        - stop
+      properties:
+        start:
+          type: string
+          format: date-time
+        stop:
+          type: string
+          format: date-time
     PreVentFile:
       type: object
       required:

@@ -1,5 +1,5 @@
 <mat-form-field appearance="fill">
-    <mat-label>Select an option</mat-label>
+    <mat-label>Select a File</mat-label>
     <mat-select [(value)]="file">
         <mat-option *ngFor='let f of files' [value]="f">{{f.file|ftrunc}}</mat-option>
     </mat-select>
