@@ -23,6 +23,7 @@
     "@angular/router": "~10.0.9",
     "@w11k/ngx-componentdestroyed": "^5.0.2",
     "d3": "^6.1.1",
+    "d3-axis": "^2.0.0",
     "d3-scale": "^3.2.2",
     "rxjs": "^6.6.2",
     "tslib": "^2.0.0",

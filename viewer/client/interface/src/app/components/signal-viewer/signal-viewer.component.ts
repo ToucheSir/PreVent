@@ -48,7 +48,7 @@ export class SignalViewerComponent extends OnDestroyMixin implements OnInit {
     // note: the scale ranges should match the viewbox of this svg (in the html file)
     var timescale = d3.scaleTime()
       .domain([this._window.start, this._window.stop])
-      .range([0, 1000]);
+      .range([50, 1000]);
 
     forkJoin(this.signals.map(s =>
       s.wave
@@ -64,10 +64,13 @@ export class SignalViewerComponent extends OnDestroyMixin implements OnInit {
 
             valscales.set(idx, d3.scaleLinear()
               .domain([minval, maxval])
-              .range([0, 100]));
+              .range([225, 0]));
+            
+            var v = valscales.get(0);
+            console.log(minval, v(minval), maxval, v(maxval));
           });
 
-          svg.selectAll('g.signal').remove();
+          svg.selectAll('g').remove();
           var path = svg.selectAll('g.signal').data(data);
           var g = path.enter().append('g')
             .attr('id', (d, i) => `signal${i}`)
@@ -93,8 +96,21 @@ export class SignalViewerComponent extends OnDestroyMixin implements OnInit {
             .style('stroke-width', 1)
             .style('fill', 'none')
             .attr('d', (d, i) => this.pathfor(this.signals[i], data[i], timescale, valscales.get(i)));
-          
+
+          var x_axis = d3.axisBottom(timescale);
+          var xaxisg = svg.append('g')
+            .attr('id', 'timeaxis')
+            .attr('transform', 'translate(0,230)');
+          xaxisg.call(x_axis);
+
+          var y_axis = d3.axisLeft(valscales.get(0));
+          var yaxisg = svg.append('g')
+            .attr('id', 'valaxis')
+            .attr('transform', 'translate(50,0)');
+          yaxisg.call(y_axis);
         });
+    
+
   }
 
   private pathfor(signal: Signal, data: DataPoint[], timescale, valscale): string {
