@@ -8,7 +8,9 @@
 #include "config.h"
 #include "Hdf5Writer.h"
 #include "WfdbWriter.h"
+#ifdef USE_MATIO
 #include "MatWriter.h"
+#endif
 #include "CsvWriter.h"
 #include "AutonWriter.h"
 #include "NullWriter.h"
@@ -41,16 +43,20 @@ namespace FormatConverter{
     switch ( fmt ) {
       case FormatConverter::HDF5:
         return std::make_unique<Hdf5Writer>( );
+#ifdef USE_WFDB
       case FormatConverter::WFDB:
         return std::make_unique<WfdbWriter>( );
+#endif
         //case DSZL:
         //return std::make_unique<ZlWriter>();
+#ifdef USE_MATIO
       case FormatConverter::MAT73:
         return std::make_unique<MatWriter>( MatVersion::MV7 );
       case FormatConverter::MAT5:
         return std::make_unique<MatWriter>( MatVersion::MV5 );
       case FormatConverter::MAT4:
         return std::make_unique<MatWriter>( MatVersion::MV4 );
+#endif
       case FormatConverter::CSV:
         return std::make_unique<CsvWriter>( );
       case FormatConverter::AUTON:

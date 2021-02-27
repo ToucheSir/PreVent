@@ -8,7 +8,11 @@
 #include "StpJsonReader.h"
 #include "CpcXmlReader.h"
 #include "CsvReader.h"
+
+#ifdef USE_TDMSMPP
 #include "TdmsReader.h"
+#endif
+
 #include "StpGeReader.h"
 #include "StpPhilipsReader.h"
 #include "DwcReader.h"
@@ -37,8 +41,12 @@ namespace FormatConverter{
 
   std::unique_ptr<Reader> Reader::get( const Format& fmt ) {
     switch ( fmt ) {
+#ifdef USE_WFDB
       case FormatConverter::WFDB:
         return std::make_unique<WfdbReader>( );
+      case FormatConverter::DWC:
+        return std::make_unique<DwcReader>( );
+#endif
       case FormatConverter::DSZL:
         return std::make_unique<ZlReader2>( );
       case FormatConverter::STPGE:
@@ -53,10 +61,10 @@ namespace FormatConverter{
         return std::make_unique<CpcXmlReader>( );
       case FormatConverter::STPJSON:
         return std::make_unique<StpJsonReader>( );
+#ifdef USE_TDMSMPP
       case FormatConverter::MEDI:
         return std::make_unique<TdmsReader>( );
-      case FormatConverter::DWC:
-        return std::make_unique<DwcReader>( );
+#endif
       case FormatConverter::CSV:
         return std::make_unique<CsvReader>( );
       default:

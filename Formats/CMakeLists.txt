@@ -34,9 +34,11 @@ execute_process (
 )
 MESSAGE( STATUS "the git hash: ${GIT_HASH}" )
 
-if( MSVC)
+if(MSVC)
   
-else()
+elseif(USE_WFDB)
+
+MESSAGE(STATUS "WFDB Support enabled")
 
 execute_process (
     COMMAND wfdb-config "--libs"
@@ -49,6 +51,9 @@ execute_process (
     OUTPUT_VARIABLE WFDB_INCLUDES
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+
+list(APPEND extra_SOURCES WfdbReader.cpp WfdbWriter.cpp DwcReader.cpp)
+
 endif()
 
 configure_file (
@@ -58,11 +63,16 @@ configure_file (
 
 add_custom_command(
   OUTPUT generated/releases.h
-  COMMAND xxd -i "releases.h.in" generated/releases.h
-  DEPENDS "releases.h.in"
+  COMMAND xxd -i releases.h.in releases.h
+  DEPENDS releases.h.in
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_library(formats SHARED AnonymizingSignalSet.cpp
+if(USE_TDMSPP)
+  list(APPEND extra_SOURCES TdmsReader.cpp)
+endif()
+
+add_library(formats AnonymizingSignalSet.cpp
 Base64.cpp
 BasicSignalData.cpp
 BasicSignalSet.cpp
@@ -86,10 +96,7 @@ SignalUtils.cpp
 StpJsonReader.cpp
 StpXmlReader.cpp
 StreamChunkReader.cpp
-TdmsReader.cpp
 TimezoneOffsetTimeSignalSet.cpp
-WfdbReader.cpp
-WfdbWriter.cpp
 Writer.cpp
 XmlReaderBase.cpp
 ZlReader2.cpp
@@ -99,7 +106,6 @@ TimeParser.cpp
 StpReaderBase.cpp
 StpGeReader.cpp
 StpPhilipsReader.cpp
-DwcReader.cpp
 NullWriter.cpp
 NullSignalData.cpp
 Log.cpp
@@ -108,6 +114,7 @@ CsvReader.cpp
 SplitLogic.cpp
 generated/config.h
 generated/releases.h
+${extra_SOURCES}
 )
 
 set(include_dest include/formatconverter-${LIBVERSION})
@@ -124,17 +131,24 @@ target_include_directories(formats
         $<BUILD_INTERFACE:generated ${HDF5_INCLUDE_DIRS} ${MATIO_INCLUDES} ${WFDB_INCLUDES} ${EXPAT_INCLUDE_DIR} ${ZIP_INCLUDEDIR}>
 )
 
+message(STATUS "WFDB libraries: ${WFDB_LIBRARIES}")
+message(STATUS "HDF5 libraries: ${HDF5_LIBRARIES}")
+message(STATUS "MATIO libraries: ${MATIO_LIBRARIES}")
+message(STATUS "ZIP libraries: ${ZIP_LIBRARIES}, ${ZIP_STATIC_LIBRARIES}, ${ZIP_LINK_LIBRARIES}")
+
 target_link_libraries(formats 
-	tdmspp-osem
+	# tdmspp-osem
 	stdc++fs
 	${EXPAT_LIBRARIES}
 	${MATIO_LIBRARIES}
+  # libmatio.a
 	${HDF5_LIBRARIES}
 	${WFDB_LIBRARIES}
-	${ZIP_LINK_LIBRARIES}
+	# ${ZIP_LIBRARIES}
+  libzip.so
 	# need this because MATIO says it links to -lhdf5, but
 	# the HDF5 package uses a full path to find the library
-	"-L/usr/lib/x86_64-linux-gnu/hdf5/serial"
+	# "-L/usr/lib/x86_64-linux-gnu/hdf5/serial"
 )
 
 install (TARGETS formats DESTINATION ${lib_dest})
